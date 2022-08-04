@@ -256,4 +256,55 @@
         door.SetBool("close", true);
     }
     
+    //객체 던지기 
     
+    [Header("References")] //헤더 
+    public Transform cam; // 메인카메라(플레이어 시점)
+    public Transform attackPoint; //객체가 나가는 방향
+    public GameObject objectToThrow; //객체
+
+    [Header("Settings")]
+    public int totalThrow;  // 총 갯수
+    public float throwCooldown; //쿨타임
+
+    [Header("Throwing")]
+    public KeyCode throwkey = KeyCode.Mouse0; // vr사용시 변경해야함
+    public float throwForce; //나가는 힘
+    public float throwUpwardForce; //
+
+    bool readyToThrow; // 쿨타임 제어 부울 함수
+
+    private void Start()
+    {
+        readyToThrow = true;
+    }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown(throwkey) && readyToThrow && totalThrow>0)
+        {
+            Throw1(); 
+        }
+    }
+    private void Throw1() // 스크립트 타이틀을 Throw라 잡아서 1 붙임 만약 다르게 하면 1 지워도됨
+    {
+        readyToThrow = false;
+
+        //객체 인스턴스화
+        GameObject projctile = Instantiate(objectToThrow, attackPoint.position, cam.rotation);
+
+        //물리충돌
+        Rigidbody RB = projctile.GetComponent<Rigidbody>();
+
+        //가속도
+        Vector3 forceToAdd = cam.transform.forward * throwForce + transform.up * throwUpwardForce;
+        RB.AddForce(forceToAdd, ForceMode.Impulse);
+        totalThrow--;
+
+        Invoke(nameof(ResetThrow), throwCooldown);
+    }
+
+   private void ResetThrow() 
+    {
+        readyToThrow=true;
+    }
