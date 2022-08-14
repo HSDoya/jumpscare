@@ -1,0 +1,98 @@
+//Jumpscare+option
+public GameObject JumpscareCam; // 점프 스케어 카메라 
+    public GameObject FPSCONTROLLER; // 플레이어 조종 제어
+    public bool JumpscareCamOn; // 카메라 켜짐 꺼짐 설정 
+    //public AudioSource GhostSound;
+    public int Enemyhelth;
+    public static bool Enemyspeed; 
+    private void Start()
+    {
+        JumpscareCam.SetActive(false); // 점프스케어 캠 off
+        FPSCONTROLLER.SetActive(true);
+        Enemyhelth = 10;
+        Enemyspeed = false;
+        
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Player")
+        { 
+            
+            JumpscareCamOn = true; //  접촉시 on == true
+            if(JumpscareCamOn == true)
+            {
+
+                FPSCONTROLLER.SetActive(false); //플레이어 조종 불가 
+                JumpscareCam.SetActive(true);
+            }
+            
+        }
+
+        else if(other.tag == "item")
+
+        {
+            Debug.Log("collider");
+            Enemyhelth -= 1;
+            Enemyspeed = true;
+            StartCoroutine(EnemySpeed());
+            
+            Destroy(other.gameObject);
+            if (Enemyhelth == 0)
+            {
+                Destroy(gameObject);
+            }
+        }    
+    }
+    IEnumerator EnemySpeed()
+    {
+        yield return new WaitForSeconds(2f);
+        Enemyspeed = false;
+    }
+    
+    
+    //EnemyAI
+    using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
+
+
+
+public class EnemyAi1 : MonoBehaviour
+{
+    
+    //public AudioClip deathAudio; // 죽는 사운드 
+    public Transform target; // 타겟지정
+
+    private NavMeshAgent agent; // 네비게이션 
+    private Rigidbody[] rbs; // 물리충돌 설정
+   
+
+    void Start()
+    {
+        
+        rbs = GetComponentsInChildren<Rigidbody>(); // 상속을 받는다 
+        agent = GetComponent<NavMeshAgent>();
+        target = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+        
+    }
+    void Update()
+    {
+        if(EnemyOption.Enemyspeed == true)
+        {
+            GetComponent<NavMeshAgent>().speed = 0f;
+            
+        }
+        else if (EnemyOption.Enemyspeed == false)
+        {
+            GetComponent<NavMeshAgent>().speed = 3.5f;
+        }
+        agent.SetDestination(target.position); // 탐색할 지점 지정(타겟의 위치로 잡음)
+
+        if (Vector3.Distance(target.position, transform.position) < 1.5f)  // 플레이어와 거리가 1.5보다 작으면 
+            UnityEngine.SceneManagement.SceneManager.LoadScene(0); // 새로운 장면을 가져온다 
+        
+
+    }
+
+}
